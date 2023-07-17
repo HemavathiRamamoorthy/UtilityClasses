@@ -1,0 +1,40 @@
+package com.utility;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import com.helper.service.VmigLogger;
+/** Utility Class for Oracle DB
+**/
+public interface OracleTableUtility {
+	Logger logger = Logger.getLogger(OracleTableUtility.class.getName());
+	VLogger log = new VLogger("OracleTableUtility", logger);
+	static List<String> getColumns(Connection conn,String tableName)
+	{
+		List<String> columnList = new ArrayList<>();
+		 ResultSet rs = null;
+		 PreparedStatement stmt =null;
+		try {
+            String query = "SELECT column_name FROM all_tab_cols WHERE table_name = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, tableName.toUpperCase());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                columnList.add(rs.getString("column_name"));
+            }
+           
+        } catch (SQLException e) {
+           log.error("SQL Exception in OracleTableUtility: "+e.getMessage());
+        }
+		finally {
+			 ConnectionUtils.closeConnection(rs, stmt, null);
+		}
+        return columnList;
+	}
+
+}

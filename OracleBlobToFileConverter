@@ -1,0 +1,32 @@
+package com.hema.utility;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.sql.*;
+import org.apache.commons.io.IOUtils;
+public class OracleBlobToFileConverter {
+    public static void main(String[] args) throws ClassNotFoundException {
+        String jdbcUrl = "jdbc:oracle:thin:hostname:1526/sid";
+        String username = "username";
+        String password = "pwd";
+    	Class.forName("oracle.jdbc.driver.OracleDriver");
+        try {
+        	Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+            String quickQuery = "select  file_name, ATTACHEMENT  from attachmentTable";
+            Statement statement = connection.createStatement();
+              ResultSet resultSet = statement.executeQuery(quickQuery);
+                    while (resultSet.next()) {
+                        Blob blob = resultSet.getBlob("ATTACHEMENT");
+                        String FILE_NAME = resultSet.getString("file_name");
+                   
+                        InputStream inputStream = resultSet.getBinaryStream("ATTACHEMENT");
+                        FileOutputStream outputStream = new FileOutputStream("C:\\Download\\files\\"+FILE_NAME);      				
+
+            				IOUtils.copy(inputStream, outputStream);
+            				outputStream.close();
+                 System.out.println("File created : "+FILE_NAME);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
